@@ -79,9 +79,9 @@ def run_bot():
 # Executar tudo
 if __name__ == "__main__":
     # Iniciar ping automático
-    ping_thread = threading.Thread(target=auto_ping)
-    ping_thread.daemon = True
-    ping_thread.start()
+    #ping_thread = threading.Thread(target=auto_ping)
+    #ping_thread.daemon = True
+    #ping_thread.start()
     
     # Iniciar bot em thread separada
     bot_thread = threading.Thread(target=run_bot)
