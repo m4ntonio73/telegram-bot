@@ -1,15 +1,26 @@
 import telebot
 import os
-import time
+from flask import Flask
 import threading
 
-# Configurar bot
+# Configurar Flask (para o Render detectar porta)
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "🤖 Bot Telegram está rodando no Render!"
+
+@app.route('/status')
+def status():
+    return "✅ Bot funcionando perfeitamente!"
+
+# Configurar bot Telegram
 TOKEN = os.getenv('TELEGRAM_TOKEN')
 bot = telebot.TeleBot(TOKEN)
 
 # Função para manter o bot ativo
 def keep_alive():
-    print("Bot Telegram está rodando...")
+    print("🚀 Bot Telegram iniciado...")
 
 # Comandos do bot
 @bot.message_handler(commands=['start'])
@@ -28,7 +39,7 @@ def help_command(message):
                 "/ping - Testar conexão")
 
 @bot.message_handler(commands=['status'])
-def status(message):
+def status_command(message):
     bot.reply_to(message, "✅ Bot funcionando perfeitamente no Render!")
 
 @bot.message_handler(commands=['ping'])
@@ -40,11 +51,18 @@ def ping(message):
 def echo_all(message):
     bot.reply_to(message, f"Você disse: {message.text}")
 
-# Iniciar bot
+# Função para rodar o bot
+def run_bot():
+    keep_alive()
+    bot.polling(none_stop=True, interval=0, timeout=60)
+
+# Executar ambos
 if __name__ == "__main__":
-    print("🚀 Iniciando bot Telegram...")
-    # Manter ativo
-    threading.Thread(target=keep_alive, daemon=True).start()
+    # Iniciar bot em thread separada
+    bot_thread = threading.Thread(target=run_bot)
+    bot_thread.daemon = True
+    bot_thread.start()
     
-    # Iniciar polling
-    bot.polling(none_stop=True, interval=0)
+    print("🌐 Servidor Flask iniciado...")
+    # Iniciar servidor Flask
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
